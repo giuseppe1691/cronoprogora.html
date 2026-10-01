@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRO-GRAM-MA DEL-LA-O-RA (CAA)</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #dbeafe;
+      --secondary: #059669;
+      --secondary-light: #d1fae5;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Arial', 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 3px solid var(--border);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 3px solid var(--primary-light);
+      padding-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-drawer-trigger {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Drawer Styles */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: -400px;
+      width: 380px;
+      max-width: 85vw;
+      height: 100vh;
+      background: var(--card-bg);
+      z-index: 1001;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+      transition: left 0.3s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .drawer.active {
+      left: 0;
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn-close {
+      background: #e2e8f0;
+      border: none;
+      font-size: 20px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Dropdown Component Styles */
+    .select-section {
+      margin-bottom: 20px;
+    }
+
+    .select-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+    }
+
+    .dropdown-box {
+      position: relative;
+      border: 3px solid var(--primary);
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .dropdown-selected {
+      padding: 12px 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 55px;
+      font-size: 18px;
+    }
+
+    .dropdown-options {
+      display: none;
+      position: absolute;
+      top: 102%;
+      left: -3px;
+      right: -3px;
+      background: white;
+      border: 3px solid var(--primary);
+      border-radius: 12px;
+      z-index: 100;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .dropdown-options.show {
+      display: block;
+    }
+
+    .option-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: bold;
+    }
+
+    .option-item:last-child {
+      border-bottom: none;
+    }
+
+    .option-item:hover {
+      background: var(--primary-light);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Phases Container & Cards */
+    .cells-container {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .cell-card {
+      border: 3px solid var(--border);
+      border-radius: 14px;
+      padding: 15px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .cell-card.active-timer-cell {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .cell-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .cell-controls {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .cell-controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn-add-cell {
+      width: 100%;
+      padding: 14px;
+      background: var(--secondary-light);
+      border: 3px dashed var(--secondary);
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .btn-delete-cell {
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 2px solid var(--danger);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Timer Widget */
+    .timer-card {
+      background: #1e293b;
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .timer-action-display {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .timer-time {
+      font-size: 48px;
+      font-weight: bold;
+      font-family: monospace;
+      margin: 10px 0;
+      color: #38bdf8;
+    }
+
+    .timer-nav-btns {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn-timer-nav {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      flex: 1;
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-timer {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn-timer-play { background: #22c55e; color: white; }
+    .btn-timer-pause { background: #eab308; color: white; }
+    .btn-timer-reset { background: #ef4444; color: white; }
+
+    /* Total Minutes Bar */
+    .total-time-bar {
+      background: #e2e8f0;
+      border-radius: 10px;
+      height: 24px;
+      width: 100%;
+      overflow: hidden;
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .total-time-fill {
+      background: var(--primary);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .total-time-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    /* Self Evaluation */
+    .evaluation-section {
+      margin-top: 25px;
+      border-top: 3px solid var(--border);
+      padding-top: 15px;
+    }
+
+    .eval-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-eval {
+      border: 3px solid var(--border);
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-eval span {
+      font-size: 28px;
+    }
+
+    .btn-eval.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Bottom Actions */
+    .action-buttons {
+      margin-top: 25px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-save { background: var(--secondary); color: white; }
+    .btn-reset { background: var(--danger); color: white; }
+
+    /* Saved Cards in Drawer */
+    .saved-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+    }
+
+    .saved-card-header {
+      font-weight: bold;
+      font-size: 14px;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .saved-card-body {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Drawer Menu (Bacheca) -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <h2>📂 BA-CHE-CA</h2>
+      <button class="btn-close" onclick="toggleDrawer()">✖</button>
+    </div>
+    <div id="savedListContainer">
+      <!-- Saved cards will load here -->
+    </div>
+    <button class="btn-action btn-reset" style="margin-top: auto;" onclick="clearAllSaved()">🗑️ E-LI-MI-NA TUT-TO</button>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>🕒 PRO-GRAM-MA DEL-LA-O-RA</h1>
+      <button class="btn-drawer-trigger" onclick="toggleDrawer()">📂 BA-CHE-CA</button>
+    </header>
+
+    <!-- Day & Hour Selectors Row -->
+    <div class="grid-2">
+      <!-- Day Selector -->
+      <div class="select-section">
+        <div class="select-label">📅 GIOR-NO DEL-LA SET-TI-MA-NA:</div>
+        <div class="dropdown-box" onclick="toggleDropdown('dayOptions')">
+          <div class="dropdown-selected" id="daySelected">❓ SCE-GLI GIOR-NO</div>
+          <div class="dropdown-options" id="dayOptions">
+            <div class="option-item" onclick="selectOption('day', '📅 LU-NE-DÌ')">📅 LU-NE-DÌ</div>
+            <div class="option-item" onclick="selectOption('day', '📅 MAR-TE-DÌ')">📅 MAR-TE-DÌ</div>
+            <div class="option-item" onclick="selectOption('day', '📅 MER-CO-LE-DÌ')">📅 MER-CO-LE-DÌ</div>
+            <div class="option-item" onclick="selectOption('day', '📅 GIO-VE-DÌ')">📅 GIO-VE-DÌ</div>
+            <div class="option-item" onclick="selectOption('day', '📅 VE-NER-DÌ')">📅 VE-NER-DÌ</div>
+            <div class="option-item" onclick="selectOption('day', '📅 SA-BA-TO')">📅 SA-BA-TO</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hour Selector -->
+      <div class="select-section">
+        <div class="select-label">⏰ O-RA DI LE-ZIO-NE:</div>
+        <div class="dropdown-box" onclick="toggleDropdown('hourOptions')">
+          <div class="dropdown-selected" id="hourSelected">❓ SCE-GLI O-RA</div>
+          <div class="dropdown-options" id="hourOptions">
+            <div class="option-item" onclick="selectOption('hour', '1️⃣ 1ª O-RA')">1️⃣ 1ª O-RA</div>
+            <div class="option-item" onclick="selectOption('hour', '2️⃣ 2ª O-RA')">2️⃣ 2ª O-RA</div>
+            <div class="option-item" onclick="selectOption('hour', '3️⃣ 3ª O-RA')">3️⃣ 3ª O-RA</div>
+            <div class="option-item" onclick="selectOption('hour', '4️⃣ 4ª O-RA')">4️⃣ 4ª O-RA</div>
+            <div class="option-item" onclick="selectOption('hour', '5️⃣ 5ª O-RA')">5️⃣ 5ª O-RA</div>
+            <div class="option-item" onclick="selectOption('hour', '6️⃣ 6ª O-RA')">6️⃣ 6ª O-RA</div>
+            <div class="option-item" onclick="selectOption('hour', '7️⃣ 7ª O-RA')">7️⃣ 7ª O-RA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject Selector -->
+    <div class="select-section">
+      <div class="select-label">📚 ADES-SO FAC-CIA-MO:</div>
+      <div class="dropdown-box" onclick="toggleDropdown('subjectOptions')">
+        <div class="dropdown-selected" id="subjectSelected">❓ SCE-GLI MA-TE-RIA</div>
+        <div class="dropdown-options" id="subjectOptions">
+          <div class="option-item" onclick="selectOption('subject', '🇮🇹 I-TA-LIA-NO')">🇮🇹 I-TA-LIA-NO</div>
+          <div class="option-item" onclick="selectOption('subject', '📜 STO-RIA')">📜 STO-RIA</div>
+          <div class="option-item" onclick="selectOption('subject', '🌍 GEO-GRA-FIA')">🌍 GEO-GRA-FIA</div>
+          <div class="option-item" onclick="selectOption('subject', '➕ MA-TE-MA-TI-CA')">➕ MA-TE-MA-TI-CA</div>
+          <div class="option-item" onclick="selectOption('subject', '⚖️ DI-RIT-TO')">⚖️ DI-RIT-TO</div>
+          <div class="option-item" onclick="selectOption('subject', '🇬🇧 IN-GLE-SE')">🇬🇧 IN-GLE-SE</div>
+          <div class="option-item" onclick="selectOption('subject', '🇫🇷 FRAN-CE-SE')">🇫🇷 FRAN-CE-SE</div>
+          <div class="option-item" onclick="selectOption('subject', '💻 IN-FOR-MA-TI-CA')">💻 IN-FOR-MA-TI-CA</div>
+          <div class="option-item" onclick="selectOption('subject', '💶 E-CO-NO-MIA')">💶 E-CO-NO-MIA</div>
+          <div class="option-item" onclick="selectOption('subject', '🕊️ RE-LI-GIO-NE')">🕊️ RE-LI-GIO-NE</div>
+          <div class="option-item" onclick="selectOption('subject', '🔬 SCIEN-ZE')">🔬 SCIEN-ZE</div>
+          <div class="option-item" onclick="selectOption('subject', '⚡ FI-SI-CA')">⚡ FI-SI-CA</div>
+          <div class="option-item" onclick="selectOption('subject', '⚽ SCIEN-ZE MO-TO-RIE')">⚽ SCIEN-ZE MO-TO-RIE</div>
+          <div class="option-item" onclick="selectOption('subject', '🏫 FUO-RI AU-LA')">🏫 FUO-RI AU-LA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Time Progress Bar -->
+    <div>
+      <div style="font-weight: bold; font-size: 16px;">⏱️ TEM-PO TO-TA-LE:</div>
+      <div class="total-time-bar">
+        <div class="total-time-fill" id="timeFill"></div>
+        <div class="total-time-text" id="timeText">0 / 60 mi-nu-ti</div>
+      </div>
+    </div>
+
+    <!-- Dynamic Phases Container -->
+    <div class="cells-container" id="cellsContainer">
+      <!-- Phases dynamically loaded -->
+    </div>
+
+    <button class="btn-add-cell" onclick="addCell()">➕ IN-SE-RI-SCI FA-SE</button>
+
+    <!-- Visual Timer Component -->
+    <div class="timer-card">
+      <div class="timer-nav-btns">
+        <button class="btn-timer-nav" onclick="navigateTimer(-1)">◀ FA-SE PRE-CE-DEN-TE</button>
+        <button class="btn-timer-nav" onclick="navigateTimer(1)">FA-SE SUC-CES-SI-VA ▶️</button>
+      </div>
+
+      <div class="timer-action-display" id="timerActionDisplay">
+        📌 NES-SU-NA FA-SE SE-LE-ZIO-NA-TA
+      </div>
+
+      <div class="timer-time" id="timerDisplay">00:00</div>
+
+      <div class="timer-controls">
+        <button class="btn-timer btn-timer-play" onclick="startTimer()">▶️ AV-VIA</button>
+        <button class="btn-timer btn-timer-pause" onclick="pauseTimer()">⏸️ PAU-SA</button>
+        <button class="btn-timer btn-timer-reset" onclick="resetTimer()">🔄 RI-AZ-ZE-RA</button>
+      </div>
+    </div>
+
+    <!-- Self Evaluation -->
+    <div class="evaluation-section">
+      <div class="select-label">🙂 CO-ME È AN-DA-TA L'O-RA?</div>
+      <div class="eval-buttons">
+        <button class="btn-eval" id="eval1" onclick="setEvaluation('😁 MOL-TO BE-NE', 'eval1')">
+          <span>😁</span> MOL-TO BE-NE
+        </button>
+        <button class="btn-eval" id="eval2" onclick="setEvaluation('🙂 BE-NE', 'eval2')">
+          <span>🙂</span> BE-NE
+        </button>
+        <button class="btn-eval" id="eval3" onclick="setEvaluation('😐 CO-SÌ CO-SÌ', 'eval3')">
+          <span>😐</span> CO-SÌ CO-SÌ
+        </button>
+      </div>
+    </div>
+
+    <!-- Global Actions -->
+    <div class="action-buttons">
+      <button class="btn-action btn-save" onclick="saveToDashboard()">💾 SAL-VA PA-GI-NA</button>
+      <button class="btn-action btn-reset" onclick="resetAll()">🗑️ RI-AZ-ZE-RA TUT-TO</button>
+    </div>
+  </div>
+
+  <script>
+    // State Data
+    let state = {
+      day: '',
+      hour: '',
+      subject: '',
+      evaluation: '',
+      evalId: '',
+      cells: []
+    };
+
+    let activeCellIndex = 0;
+    let timerInterval = null;
+    let timerSecondsLeft = 0;
+
+    // Updated action options including GIO-CHIA-MO and AN-DIA-MO A CA-SA
+    const actionOptions = [
+      '📝 ⚙️️ LA-VO-RIA-MO',
+      '🎮 GIO-CHIA-MO',
+      '🛑 ☕ PAU-SA',
+      '🔔 🍎 IN-TER-VAL-LO',
+      '🍕 🥪 PRAN-ZO',
+      '🏠 AN-DIA-MO A CA-SA'
+    ];
+
+    const minuteOptions = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+
+    // Initialize App
+    window.onload = function() {
+      loadState();
+      if (state.cells.length === 0) {
+        addCell();
+      } else {
+        renderCells();
+      }
+      updateTopDisplays();
+      updateTotalTime();
+      updateTimerDisplayForCell();
+      renderSavedDashboard();
+    };
+
+    // Save & Load Persistence
+    function saveState() {
+      localStorage.setItem('caa_lesson_state', JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('caa_lesson_state');
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch(e) { console.error(e); }
+      }
+    }
+
+    function updateTopDisplays() {
+      if (state.day) document.getElementById('daySelected').innerText = state.day;
+      if (state.hour) document.getElementById('hourSelected').innerText = state.hour;
+      if (state.subject) document.getElementById('subjectSelected').innerText = state.subject;
+      if (state.evalId) {
+        document.querySelectorAll('.btn-eval').forEach(b => b.classList.remove('selected'));
+        const btn = document.getElementById(state.evalId);
+        if (btn) btn.classList.add('selected');
+      }
+    }
+
+    // Dropdown Handling
+    function toggleDropdown(id) {
+      const el = document.getElementById(id);
+      const isShow = el.classList.contains('show');
+      closeAllDropdowns();
+      if (!isShow) el.classList.add('show');
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-options').forEach(d => d.classList.remove('show'));
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-box')) {
+        closeAllDropdowns();
+      }
+    });
+
+    function selectOption(type, val) {
+      if (type === 'day') {
+        state.day = val;
+        document.getElementById('daySelected').innerText = val;
+      } else if (type === 'hour') {
+        state.hour = val;
+        document.getElementById('hourSelected').innerText = val;
+      } else if (type === 'subject') {
+        state.subject = val;
+        document.getElementById('subjectSelected').innerText = val;
+      }
+      saveState();
+    }
+
+    // Dynamic Phases Management
+    function addCell() {
+      state.cells.push({
+        action: actionOptions[0],
+        minutes: 15
+      });
+      saveState();
+      renderCells();
+      updateTotalTime();
+      if (state.cells.length === 1) {
+        activeCellIndex = 0;
+        updateTimerDisplayForCell();
+      }
+    }
+
+    function removeCell(index) {
+      state.cells.splice(index, 1);
+      if (activeCellIndex >= state.cells.length) {
+        activeCellIndex = Math.max(0, state.cells.length - 1);
+      }
+      saveState();
+      renderCells();
+      updateTotalTime();
+      updateTimerDisplayForCell();
+    }
+
+    function setCellAction(index, action) {
+      state.cells[index].action = action;
+      saveState();
+      renderCells();
+      if (index === activeCellIndex) updateTimerDisplayForCell();
+    }
+
+    function setCellMinutes(index, mins) {
+      state.cells[index].minutes = parseInt(mins);
+      saveState();
+      renderCells();
+      updateTotalTime();
+      if (index === activeCellIndex) updateTimerDisplayForCell();
+    }
+
+    function renderCells() {
+      const container = document.getElementById('cellsContainer');
+      container.innerHTML = '';
+
+      state.cells.forEach((cell, idx) => {
+        const card = document.createElement('div');
+        card.className = `cell-card ${idx === activeCellIndex ? 'active-timer-cell' : ''}`;
+
+        const actionOptsHTML = actionOptions.map(opt => 
+          `<div class="option-item" onclick="setCellAction(${idx}, '${opt}')">${opt}</div>`
+        ).join('');
+
+        const minuteOptsHTML = minuteOptions.map(m => 
+          `<div class="option-item" onclick="setCellMinutes(${idx}, ${m})">⏱️ ${m} mi-nu-ti</div>`
+        ).join('');
+
+        card.innerHTML = `
+          <div class="cell-header">
+            <span>🟢 FA-SE ${idx + 1}</span>
+            ${state.cells.length > 1 ? `<button class="btn-delete-cell" onclick="removeCell(${idx})">🗑️ E-LI-MI-NA</button>` : ''}
+          </div>
+          <div class="cell-controls">
+            <!-- Action Dropdown -->
+            <div class="dropdown-box" onclick="toggleDropdown('actionOpts_${idx}')">
+              <div class="dropdown-selected">${cell.action}</div>
+              <div class="dropdown-options" id="actionOpts_${idx}">
+                ${actionOptsHTML}
+              </div>
+            </div>
+            <!-- Minutes Dropdown -->
+            <div class="dropdown-box" onclick="toggleDropdown('minuteOpts_${idx}')">
+              <div class="dropdown-selected">⏱️ ${cell.minutes} mi-nu-ti</div>
+              <div class="dropdown-options" id="minuteOpts_${idx}">
+                ${minuteOptsHTML}
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateTotalTime() {
+      const total = state.cells.reduce((acc, c) => acc + (c.minutes || 0), 0);
+      const fill = document.getElementById('timeFill');
+      const text = document.getElementById('timeText');
+
+      const pct = Math.min(100, (total / 60) * 100);
+      fill.style.width = pct + '%';
+      fill.style.background = total > 60 ? 'var(--danger)' : 'var(--primary)';
+      text.innerText = `${total} / 60 mi-nu-ti`;
+    }
+
+    // Evaluation Selection
+    function setEvaluation(text, id) {
+      state.evaluation = text;
+      state.evalId = id;
+      document.querySelectorAll('.btn-eval').forEach(b => b.classList.remove('selected'));
+      document.getElementById(id).classList.add('selected');
+      saveState();
+    }
+
+    // Timer Controls Logic
+    function updateTimerDisplayForCell() {
+      if (state.cells.length === 0) {
+        document.getElementById('timerActionDisplay').innerText = '📌 NES-SU-NA FA-SE';
+        document.getElementById('timerDisplay').innerText = '00:00';
+        return;
+      }
+
+      const cell = state.cells[activeCellIndex];
+      document.getElementById('timerActionDisplay').innerText = `🟢 FA-SE ${activeCellIndex + 1}: ${cell.action} (${cell.minutes} mi-nu-ti)`;
+      
+      if (!timerInterval) {
+        timerSecondsLeft = cell.minutes * 60;
+        renderTimerTime();
+      }
+    }
+
+    function renderTimerTime() {
+      const m = Math.floor(timerSecondsLeft / 60);
+      const s = timerSecondsLeft % 60;
+      document.getElementById('timerDisplay').innerText = 
+        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function navigateTimer(dir) {
+      pauseTimer();
+      activeCellIndex += dir;
+      if (activeCellIndex < 0) activeCellIndex = state.cells.length - 1;
+      if (activeCellIndex >= state.cells.length) activeCellIndex = 0;
+      renderCells();
+      updateTimerDisplayForCell();
+    }
+
+    function startTimer() {
+      if (timerInterval) return;
+      if (timerSecondsLeft <= 0) {
+        const cell = state.cells[activeCellIndex];
+        timerSecondsLeft = (cell ? cell.minutes : 15) * 60;
+      }
+
+      timerInterval = setInterval(() => {
+        if (timerSecondsLeft > 0) {
+          timerSecondsLeft--;
+          renderTimerTime();
+        } else {
+          pauseTimer();
+          playBeep();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      const cell = state.cells[activeCellIndex];
+      timerSecondsLeft = (cell ? cell.minutes : 15) * 60;
+      renderTimerTime();
+    }
+
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 587.33; // D5
+        osc.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+      } catch(e) {}
+    }
+
+    // Reset All State
+    function resetAll() {
+      pauseTimer();
+      state = {
+        day: '',
+        hour: '',
+        subject: '',
+        evaluation: '',
+        evalId: '',
+        cells: []
+      };
+      localStorage.removeItem('caa_lesson_state');
+      document.getElementById('daySelected').innerText = '❓ SCE-GLI GIOR-NO';
+      document.getElementById('hourSelected').innerText = '❓ SCE-GLI O-RA';
+      document.getElementById('subjectSelected').innerText = '❓ SCE-GLI MA-TE-RIA';
+      document.querySelectorAll('.btn-eval').forEach(b => b.classList.remove('selected'));
+      addCell();
+    }
+
+    // Drawer / Dashboard Management
+    function toggleDrawer() {
+      document.getElementById('drawer').classList.toggle('active');
+      document.getElementById('drawerOverlay').classList.toggle('active');
+    }
+
+    function saveToDashboard() {
+      const savedItems = JSON.parse(localStorage.getItem('caa_saved_dashboard') || '[]');
+      const newItem = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}),
+        day: state.day || 'Giorno non specificato',
+        hour: state.hour || 'Ora non specificata',
+        subject: state.subject || 'Materia non specificata',
+        evaluation: state.evaluation || 'Nessuna autovalutazione',
+        cells: [...state.cells]
+      };
+
+      savedItems.unshift(newItem);
+      localStorage.setItem('caa_saved_dashboard', JSON.stringify(savedItems));
+      renderSavedDashboard();
+    }
+
+    function renderSavedDashboard() {
+      const savedItems = JSON.parse(localStorage.getItem('caa_saved_dashboard') || '[]');
+      const container = document.getElementById('savedListContainer');
+      container.innerHTML = '';
+
+      if (savedItems.length === 0) {
+        container.innerHTML = '<p style="color: #64748b;">Nessuna lezione salvata.</p>';
+        return;
+      }
+
+      savedItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'saved-card';
+        const cellsList = item.cells.map((c, i) => `<div>• F${i+1}: ${c.action} (${c.minutes}m)</div>`).join('');
+
+        card.innerHTML = `
+          <div class="saved-card-header">
+            <span>📅 ${item.date}</span>
+            <button style="border:none; background:none; cursor:pointer;" onclick="deleteSavedItem(${item.id})">❌</button>
+          </div>
+          <div class="saved-card-body">
+            <div><strong>${item.day}</strong> - <strong>${item.hour}</strong></div>
+            <div>📚 <strong>${item.subject}</strong></div>
+            <div style="margin: 5px 0;">${cellsList}</div>
+            <div>Valutazione: <strong>${item.evaluation}</strong></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function deleteSavedItem(id) {
+      let savedItems = JSON.parse(localStorage.getItem('caa_saved_dashboard') || '[]');
+      savedItems = savedItems.filter(item => item.id !== id);
+      localStorage.setItem('caa_saved_dashboard', JSON.stringify(savedItems));
+      renderSavedDashboard();
+    }
+
+    function clearAllSaved() {
+      localStorage.removeItem('caa_saved_dashboard');
+      renderSavedDashboard();
+    }
+  </script>
+</body>
+</html>
